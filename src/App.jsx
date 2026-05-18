@@ -1,5 +1,18 @@
 import { useState, useEffect } from 'react'
-import { Plus, Trash2, CheckCircle2, Circle, Search, ListTodo } from 'lucide-react'
+import { 
+  Plus, 
+  Trash2, 
+  CheckCircle2, 
+  Circle, 
+  Menu, 
+  LayoutList, 
+  Settings, 
+  Sun, 
+  Moon, 
+  Pencil,
+  X,
+  Smile
+} from 'lucide-react'
 import AsyncStorage from './lib/storage'
 import { clsx } from 'clsx'
 import { twMerge } from 'tailwind-merge'
@@ -13,25 +26,51 @@ const STORAGE_KEY = '@todo_list_tasks'
 export default function App() {
   const [tasks, setTasks] = useState([])
   const [inputValue, setInputValue] = useState('')
-  const [filter, setFilter] = useState('all') // all, active, completed
+  const [filter, setFilter] = useState('all')
   const [isLoading, setIsLoading] = useState(true)
+  const [isDarkMode, setIsDarkMode] = useState(false)
+  const [editingId, setEditingId] = useState(null)
+  const [editValue, setEditValue] = useState('')
 
-  // Load tasks on mount
+  // Load tasks and theme on mount
   useEffect(() => {
-    const loadTasks = async () => {
+    const loadData = async () => {
       const savedTasks = await AsyncStorage.getItem(STORAGE_KEY)
+      const savedTheme = localStorage.getItem('@todo_theme')
+      
       if (savedTasks) {
         try {
           setTasks(JSON.parse(savedTasks))
         } catch (e) {
           console.error("Failed to parse tasks", e)
-          setTasks([])
         }
+      }
+      
+      const shouldBeDark = savedTheme === 'dark'
+      setIsDarkMode(shouldBeDark)
+      if (shouldBeDark) {
+        document.documentElement.classList.add('dark')
+      } else {
+        document.documentElement.classList.remove('dark')
       }
       setIsLoading(false)
     }
-    loadTasks()
+    loadData()
   }, [])
+
+  const toggleTheme = () => {
+    setIsDarkMode(prev => {
+      const newMode = !prev
+      if (newMode) {
+        document.documentElement.classList.add('dark')
+        localStorage.setItem('@todo_theme', 'dark')
+      } else {
+        document.documentElement.classList.remove('dark')
+        localStorage.setItem('@todo_theme', 'light')
+      }
+      return newMode
+    })
+  }
 
   // Save tasks on change
   useEffect(() => {
@@ -65,131 +104,219 @@ export default function App() {
     setTasks(tasks.filter(task => task.id !== id))
   }
 
+  const startEditing = (task) => {
+    setEditingId(task.id)
+    setEditValue(task.text)
+  }
+
+  const saveEdit = () => {
+    if (!editValue.trim()) return
+    setTasks(tasks.map(task => 
+      task.id === editingId ? { ...task, text: editValue.trim() } : task
+    ))
+    setEditingId(null)
+  }
+
   const filteredTasks = tasks.filter(task => {
     if (filter === 'active') return !task.completed
     if (filter === 'completed') return task.completed
     return true
   })
 
-  const activeCount = tasks.filter(t => !t.completed).length
-
   return (
-    <div className="min-h-screen bg-slate-50 py-12 px-4 flex flex-col justify-center">
-      <div className="max-w-md w-full mx-auto bg-white rounded-2xl shadow-xl overflow-hidden border border-slate-100">
-        {/* Header */}
-        <div className="bg-indigo-600 p-8 text-white">
-          <div className="flex items-center gap-3 mb-2">
-            <ListTodo size={28} />
-            <h1 className="text-2xl font-bold tracking-tight">Minhas Tarefas</h1>
-          </div>
-          <p className="text-indigo-100 text-sm opacity-90">
-            {activeCount === 0 
-              ? "Tudo pronto por aqui!" 
-              : `Você tem ${activeCount} ${activeCount === 1 ? 'tarefa pendente' : 'tarefas pendentes'}`}
-          </p>
+    <div className={cn(
+      "flex h-screen w-full transition-colors duration-300",
+      isDarkMode ? "bg-figma-bg-dark text-white" : "bg-figma-bg-light text-slate-900"
+    )}>
+      {/* Sidebar */}
+      <aside className={cn(
+        "flex flex-col border-r w-20 transition-all duration-300",
+        isDarkMode ? "bg-figma-sidebar-dark border-slate-800" : "bg-figma-sidebar-light border-slate-200"
+      )}>
+        <div className="p-6 flex flex-col items-center gap-8">
+          <button className={cn(
+            "p-2 rounded-lg transition-colors",
+            isDarkMode ? "hover:bg-slate-800 text-white" : "hover:bg-slate-100 text-slate-900"
+          )}>
+            <Menu size={24} />
+          </button>
+          
+          <nav className="flex flex-col gap-6">
+            <button 
+              onClick={() => setFilter('all')}
+              className={cn(
+                "p-3 rounded-xl transition-all",
+                filter === 'all' 
+                  ? (isDarkMode ? "bg-slate-800 text-white shadow-lg shadow-black/50" : "bg-slate-100 text-slate-900 shadow-sm")
+                  : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+              )}
+            >
+              <LayoutList size={24} />
+            </button>
+            <button 
+              className="p-3 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all"
+            >
+              <Settings size={24} />
+            </button>
+          </nav>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col overflow-hidden relative">
+        {/* Header Theme Toggle */}
+        <div className="absolute top-8 right-8">
+          <button 
+            onClick={toggleTheme}
+            className={cn(
+              "p-2 rounded-full transition-colors",
+              isDarkMode ? "hover:bg-slate-800 text-white" : "hover:bg-slate-200 text-slate-900"
+            )}
+          >
+            {isDarkMode ? <Sun size={24} /> : <Moon size={24} />}
+          </button>
         </div>
 
-        {/* Input Area */}
-        <form onSubmit={addTask} className="p-6 border-b border-slate-100">
-          <div className="relative group">
+        {/* Title */}
+        <header className="pt-16 pb-8 text-center">
+          <h1 className={cn(
+            "text-3xl font-bold tracking-tight",
+            isDarkMode ? "text-white" : "text-slate-800"
+          )}>
+            My Tasks
+          </h1>
+        </header>
+
+        {/* Search/Add Section */}
+        <div className="px-8 mb-12 flex justify-center">
+          <form onSubmit={addTask} className="w-full max-w-xl flex gap-3">
             <input
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Adicionar nova tarefa..."
-              className="w-full pl-4 pr-12 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all placeholder:text-slate-400 text-slate-900"
+              placeholder="Type your task here.."
+              className={cn(
+                "flex-1 px-5 py-3 rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-slate-400 text-sm",
+                isDarkMode 
+                  ? "bg-figma-input-dark border-slate-700 text-white placeholder:text-slate-500" 
+                  : "bg-figma-input-light border-slate-200 text-slate-900 placeholder:text-slate-400"
+              )}
             />
             <button
               type="submit"
               disabled={!inputValue.trim()}
-              className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-            >
-              <Plus size={20} />
-            </button>
-          </div>
-        </form>
-
-        {/* Filters */}
-        <div className="flex gap-1 p-2 bg-slate-50 mx-6 mt-4 rounded-lg">
-          {['all', 'active', 'completed'].map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
               className={cn(
-                "flex-1 py-1.5 text-xs font-medium rounded-md transition-all capitalize",
-                filter === f 
-                  ? "bg-white text-indigo-600 shadow-sm" 
-                  : "text-slate-500 hover:text-slate-700"
+                "px-6 py-3 rounded-xl font-bold text-sm transition-all disabled:opacity-50 flex items-center gap-2",
+                isDarkMode 
+                  ? "bg-figma-btn-dark text-white hover:bg-slate-600" 
+                  : "bg-figma-btn-light text-white hover:bg-slate-800"
               )}
             >
-              {f === 'all' ? 'Todas' : f === 'active' ? 'Pendentes' : 'Concluídas'}
+              + Add
             </button>
-          ))}
+          </form>
         </div>
 
-        {/* Task List */}
-        <div className="p-6 space-y-3 max-h-[400px] overflow-y-auto">
-          {isLoading ? (
-            <div className="text-center py-8 text-slate-400">Carregando...</div>
-          ) : filteredTasks.length === 0 ? (
-            <div className="text-center py-12">
-              <div className="bg-slate-50 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Search className="text-slate-300" size={24} />
-              </div>
-              <p className="text-slate-400 text-sm">Nenhuma tarefa encontrada.</p>
+        {/* Task List Section */}
+        <div className="flex-1 overflow-y-auto px-8 pb-12 flex flex-col items-center">
+          <div className="w-full max-w-xl">
+            {/* List */}
+            <div className="space-y-4">
+              {isLoading ? (
+                <div className="text-center py-20 text-slate-400">Loading...</div>
+              ) : filteredTasks.length === 0 ? (
+                <div className="flex flex-col md:flex-row items-center justify-center py-20 gap-8">
+                  <div className="relative">
+                    <div className="w-48 h-48 flex items-center justify-center opacity-80">
+                      <svg viewBox="0 0 200 200" className={isDarkMode ? "text-slate-700" : "text-slate-300"}>
+                        <path fill="currentColor" d="M100 0C44.8 0 0 44.8 0 100s44.8 100 100 100 100-44.8 100-100S155.2 0 100 0zm0 180c-44.1 0-80-35.9-80-80s35.9-80 80-80 80 35.9 80 80-35.9 80-80 80z"/>
+                        <circle cx="70" cy="85" r="10" fill="currentColor"/>
+                        <circle cx="130" cy="85" r="10" fill="currentColor"/>
+                        <path stroke="currentColor" strokeWidth="5" fill="none" d="M60 130s20 20 40 20 40-20 40-20"/>
+                      </svg>
+                    </div>
+                  </div>
+                  <div className="text-left max-w-xs">
+                    <p className={cn(
+                      "text-lg font-medium",
+                      isDarkMode ? "text-slate-300" : "text-slate-600"
+                    )}>
+                      Empty as my motivation on Monday <Smile className="inline text-yellow-500" size={20} />.
+                    </p>
+                    <p className="text-sm text-slate-400 mt-1">Let's start adding stuff!</p>
+                  </div>
+                </div>
+              ) : (
+                filteredTasks.map(task => (
+                  <div
+                    key={task.id}
+                    className={cn(
+                      "group flex items-center gap-4 p-4 rounded-2xl transition-all border",
+                      isDarkMode 
+                        ? "bg-figma-sidebar-dark border-slate-800 hover:border-slate-700" 
+                        : "bg-white border-slate-100 hover:border-slate-200 shadow-sm"
+                    )}
+                  >
+                    <button
+                      onClick={() => toggleTask(task.id)}
+                      className={cn(
+                        "transition-colors",
+                        task.completed ? "text-indigo-500" : "text-slate-300 hover:text-slate-400"
+                      )}
+                    >
+                      {task.completed ? <CheckCircle2 size={24} /> : <Circle size={24} />}
+                    </button>
+                    
+                    {editingId === task.id ? (
+                      <div className="flex-1 flex gap-2">
+                        <input 
+                          autoFocus
+                          value={editValue}
+                          onChange={(e) => setEditValue(e.target.value)}
+                          onKeyDown={(e) => e.key === 'Enter' && saveEdit()}
+                          className={cn(
+                            "flex-1 bg-transparent border-b focus:outline-none text-sm",
+                            isDarkMode ? "border-indigo-400" : "border-indigo-500"
+                          )}
+                        />
+                        <button onClick={saveEdit} className="text-indigo-500"><Plus size={18}/></button>
+                        <button onClick={() => setEditingId(null)} className="text-slate-400"><X size={18}/></button>
+                      </div>
+                    ) : (
+                      <span className={cn(
+                        "flex-1 text-sm font-medium transition-all",
+                        task.completed ? "line-through text-slate-500" : isDarkMode ? "text-slate-200" : "text-slate-700"
+                      )}>
+                        {task.text}
+                      </span>
+                    )}
+
+                    <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
+                      <button
+                        onClick={() => startEditing(task)}
+                        className="p-1.5 text-slate-400 hover:text-indigo-500 rounded-lg transition-colors"
+                      >
+                        <Pencil size={18} />
+                      </button>
+                      <button
+                        onClick={() => deleteTask(task.id)}
+                        className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
+                      >
+                        <Trash2 size={18} />
+                      </button>
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
-          ) : (
-            filteredTasks.map(task => (
-              <div
-                key={task.id}
-                className={cn(
-                  "group flex items-center gap-3 p-3 rounded-xl border transition-all",
-                  task.completed 
-                    ? "bg-slate-50 border-transparent opacity-60" 
-                    : "bg-white border-slate-100 hover:border-indigo-200 hover:shadow-sm"
-                )}
-              >
-                <button
-                  onClick={() => toggleTask(task.id)}
-                  className={cn(
-                    "transition-colors",
-                    task.completed ? "text-indigo-500" : "text-slate-300 hover:text-indigo-400"
-                  )}
-                >
-                  {task.completed ? <CheckCircle2 size={22} /> : <Circle size={22} />}
-                </button>
-                
-                <span className={cn(
-                  "flex-1 text-sm transition-all",
-                  task.completed ? "line-through text-slate-400" : "text-slate-700"
-                )}>
-                  {task.text}
-                </span>
-
-                <button
-                  onClick={() => deleteTask(task.id)}
-                  className="p-1.5 text-slate-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-all"
-                >
-                  <Trash2 size={18} />
-                </button>
-              </div>
-            ))
-          )}
+          </div>
         </div>
 
-        {/* Footer */}
-        <div className="px-8 py-4 bg-slate-50 border-t border-slate-100 flex justify-between items-center">
-          <span className="text-xs text-slate-400 font-medium uppercase tracking-wider">
-            Simple To-Do
-          </span>
-          <button 
-            onClick={() => setTasks(tasks.filter(t => !t.completed))}
-            className="text-xs text-indigo-600 hover:text-indigo-700 font-semibold"
-          >
-            Limpar concluídas
-          </button>
+        {/* Footer info */}
+        <div className="p-8 text-center text-[10px] text-slate-400 font-medium tracking-widest">
+          © 2025
         </div>
-      </div>
+      </main>
     </div>
   )
 }
