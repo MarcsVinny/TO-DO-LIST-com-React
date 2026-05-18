@@ -33,7 +33,9 @@ Uma aplicação de lista de tarefas moderna e funcional, desenvolvida com React 
 
 ## 🌐 Deploy
 
-O projeto está configurado para deploy automático na Vercel.
+O projeto está online e pode ser acessado através do link abaixo:
+
+**[Acesse o Sistema na Vercel](https://to-do-list-com-react-inky.vercel.app?_vercel_share=2UQ6HdS2sZaHgcnz22h12fdL8955alAr)**
 
 ---
 Desenvolvido como parte das atividades de Programação para Web.
