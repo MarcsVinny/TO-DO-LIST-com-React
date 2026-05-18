@@ -1,16 +1,39 @@
-# React + Vite
+# Simple To-Do List
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Uma aplicação de lista de tarefas moderna e funcional, desenvolvida com React e Tailwind CSS, seguindo rigorosamente o design proposto no Figma.
 
-Currently, two official plugins are available:
+## 🚀 Funcionalidades
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- **Gestão de Tarefas**: Adicione, edite, conclua e remova tarefas de forma intuitiva.
+- **Modo Escuro/Claro**: Alternância dinâmica de temas com persistência automática.
+- **Design Fiel**: Interface inspirada no design moderno do Figma, com sidebar e componentes personalizados.
+- **Persistência Local**: Seus dados são salvos no navegador e não se perdem ao atualizar a página.
 
-## React Compiler
+## 🛠️ Tecnologias Utilizadas
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **React**: Biblioteca principal para construção da interface.
+- **Tailwind CSS v4**: Framework CSS para estilização moderna e responsiva.
+- **Lucide React**: Biblioteca de ícones elegantes.
+- **Vite**: Ferramenta de build rápida para o desenvolvimento.
 
-## Expanding the ESLint configuration
+## 📦 Como rodar o projeto
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+1. Clone o repositório:
+   ```bash
+   git clone https://github.com/MarcsVinny/TO-DO-LIST-com-React.git
+   ```
+2. Instale as dependências:
+   ```bash
+   npm install
+   ```
+3. Inicie o servidor de desenvolvimento:
+   ```bash
+   npm run dev
+   ```
+
+## 🌐 Deploy
+
+O projeto está configurado para deploy automático na Vercel.
+
+---
+Desenvolvido como parte das atividades de Programação para Web.

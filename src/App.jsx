@@ -144,6 +144,7 @@ export default function App() {
           <nav className="flex flex-col gap-6">
             <button 
               onClick={() => setFilter('all')}
+              title="Minhas Tarefas"
               className={cn(
                 "p-3 rounded-xl transition-all",
                 filter === 'all' 
@@ -154,6 +155,7 @@ export default function App() {
               <LayoutList size={24} />
             </button>
             <button 
+              title="Configurações"
               className="p-3 rounded-xl text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all"
             >
               <Settings size={24} />
@@ -168,6 +170,7 @@ export default function App() {
         <div className="absolute top-8 right-8">
           <button 
             onClick={toggleTheme}
+            title={isDarkMode ? "Mudar para modo claro" : "Mudar para modo escuro"}
             className={cn(
               "p-2 rounded-full transition-colors",
               isDarkMode ? "hover:bg-slate-800 text-white" : "hover:bg-slate-200 text-slate-900"
@@ -183,7 +186,7 @@ export default function App() {
             "text-3xl font-bold tracking-tight",
             isDarkMode ? "text-white" : "text-slate-800"
           )}>
-            My Tasks
+            Minhas Tarefas
           </h1>
         </header>
 
@@ -194,7 +197,7 @@ export default function App() {
               type="text"
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
-              placeholder="Type your task here.."
+              placeholder="Digite sua tarefa aqui.."
               className={cn(
                 "flex-1 px-5 py-3 rounded-xl border transition-all focus:outline-none focus:ring-1 focus:ring-slate-400 text-sm",
                 isDarkMode 
@@ -212,7 +215,7 @@ export default function App() {
                   : "bg-figma-btn-light text-white hover:bg-slate-800"
               )}
             >
-              + Add
+              + Adicionar
             </button>
           </form>
         </div>
@@ -223,7 +226,7 @@ export default function App() {
             {/* List */}
             <div className="space-y-4">
               {isLoading ? (
-                <div className="text-center py-20 text-slate-400">Loading...</div>
+                <div className="text-center py-20 text-slate-400">Carregando...</div>
               ) : filteredTasks.length === 0 ? (
                 <div className="flex flex-col md:flex-row items-center justify-center py-20 gap-8">
                   <div className="relative">
@@ -241,9 +244,9 @@ export default function App() {
                       "text-lg font-medium",
                       isDarkMode ? "text-slate-300" : "text-slate-600"
                     )}>
-                      Empty as my motivation on Monday <Smile className="inline text-yellow-500" size={20} />.
+                      Vazio como minha motivação na segunda-feira <Smile className="inline text-yellow-500" size={20} />.
                     </p>
-                    <p className="text-sm text-slate-400 mt-1">Let's start adding stuff!</p>
+                    <p className="text-sm text-slate-400 mt-1">Vamos começar a adicionar coisas!</p>
                   </div>
                 </div>
               ) : (
@@ -259,6 +262,7 @@ export default function App() {
                   >
                     <button
                       onClick={() => toggleTask(task.id)}
+                      title={task.completed ? "Marcar como pendente" : "Marcar como concluída"}
                       className={cn(
                         "transition-colors",
                         task.completed ? "text-indigo-500" : "text-slate-300 hover:text-slate-400"
@@ -279,8 +283,8 @@ export default function App() {
                             isDarkMode ? "border-indigo-400" : "border-indigo-500"
                           )}
                         />
-                        <button onClick={saveEdit} className="text-indigo-500"><Plus size={18}/></button>
-                        <button onClick={() => setEditingId(null)} className="text-slate-400"><X size={18}/></button>
+                        <button onClick={saveEdit} title="Salvar" className="text-indigo-500"><Plus size={18}/></button>
+                        <button onClick={() => setEditingId(null)} title="Cancelar" className="text-slate-400"><X size={18}/></button>
                       </div>
                     ) : (
                       <span className={cn(
@@ -294,12 +298,14 @@ export default function App() {
                     <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all">
                       <button
                         onClick={() => startEditing(task)}
+                        title="Editar tarefa"
                         className="p-1.5 text-slate-400 hover:text-indigo-500 rounded-lg transition-colors"
                       >
                         <Pencil size={18} />
                       </button>
                       <button
                         onClick={() => deleteTask(task.id)}
+                        title="Excluir tarefa"
                         className="p-1.5 text-slate-400 hover:text-red-500 rounded-lg transition-colors"
                       >
                         <Trash2 size={18} />
